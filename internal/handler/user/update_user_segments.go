@@ -3,6 +3,7 @@ package user
 import (
 	"avito-internship-2023/internal/dto"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -13,8 +14,10 @@ func (h *Handler) updateUserSegments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.segmentService.UpdateUserSegments(r.Context(), mux.Vars(r)["id"], &updateUserSegmentsDTO)
+	userID := mux.Vars(r)["id"]
+	err := h.segmentService.UpdateUserSegments(r.Context(), userID, &updateUserSegmentsDTO)
 	if err != nil {
+		zap.L().Info("failed to update user segments", zap.Error(err))
 		h.r.JsonError(w, err)
 		return
 	}

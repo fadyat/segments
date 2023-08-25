@@ -56,6 +56,31 @@ func (u *UpdateUserSegments) Validate() error {
 	return nil
 }
 
-type UserSegments struct {
-	Segments []string `json:"segments"`
+type UserSegment struct {
+	Slug string `json:"slug"`
 }
+
+type UserSegmentStatus bool
+
+func NewUserSegmentStatus(
+	status string,
+	defaultStatus ...UserSegmentStatus,
+) UserSegmentStatus {
+	switch status {
+	case "active":
+		return Active
+	case "inactive":
+		return Inactive
+	}
+
+	if len(defaultStatus) > 0 {
+		return defaultStatus[0]
+	}
+
+	return Active
+}
+
+const (
+	Active   UserSegmentStatus = true
+	Inactive UserSegmentStatus = false
+)

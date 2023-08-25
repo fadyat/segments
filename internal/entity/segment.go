@@ -23,3 +23,9 @@ func (s *Segment) ToSegmentCreatedDTO() *dto.SegmentCreated {
 		Slug: s.Slug,
 	}
 }
+
+func (s *Segment) ToUserSegmentDTO() *dto.UserSegment {
+	return &dto.UserSegment{
+		Slug: s.Slug,
+	}
+}

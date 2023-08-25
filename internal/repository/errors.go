@@ -28,3 +28,17 @@ func NewAlreadyExistsError(msg string) *AlreadyExistsError {
 func (e *AlreadyExistsError) ToApiError() error {
 	return api.NewConflictError(e.msg)
 }
+
+type NotFoundError struct {
+	baseError
+}
+
+func NewNotFoundError(msg string) *NotFoundError {
+	return &NotFoundError{
+		baseError: baseError{msg: msg},
+	}
+}
+
+func (e *NotFoundError) ToApiError() error {
+	return api.NewNotFoundError(e.msg)
+}

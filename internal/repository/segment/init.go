@@ -2,6 +2,7 @@ package segment
 
 import (
 	"avito-internship-2023/internal/repository"
+	"database/sql"
 	"errors"
 	"github.com/lib/pq"
 )
@@ -21,6 +22,8 @@ func NewRepository(
 func toSegmentError(err error) error {
 	var e *pq.Error
 	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return repository.NewNotFoundError("segment not found")
 	case errors.As(err, &e):
 		return postgresErrorToCustomError(err.(*pq.Error))
 	default:

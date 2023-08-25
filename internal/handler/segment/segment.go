@@ -4,6 +4,7 @@ import (
 	"avito-internship-2023/internal/api"
 	"avito-internship-2023/internal/dto"
 	"avito-internship-2023/internal/service"
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -40,4 +41,17 @@ func (h *Handler) newSegment(w http.ResponseWriter, r *http.Request) {
 
 	h.r.Json(w, http.StatusCreated, createdSegment)
 	zap.S().Infof("segment created: %s", createdSegment.ID)
+}
+
+func (h *Handler) deleteSegment(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+
+	err := h.segmentService.DeleteSegment(r.Context(), id)
+	if err != nil {
+		zap.L().Info("failed to delete segment", zap.Error(err))
+		h.r.JsonError(w, err)
+		return
+	}
+
+	h.r.Json(w, http.StatusNoContent, http.NoBody)
 }

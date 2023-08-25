@@ -71,3 +71,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /segment/{id}:
+    delete:
+      tags:
+        - segment
+      summary: Delete segment by id
+      operationId: deleteSegment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Segment id
+          schema:
+            type: string
+            example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+      responses:
+        '204':
+          description: Segment deleted
+        '404':
+          description: Segment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

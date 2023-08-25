@@ -7,4 +7,5 @@ import (
 
 type ISegment interface {
 	NewSegment(context.Context, *dto.CreateSegment) (*dto.SegmentCreated, error)
+	DeleteSegment(context.Context, string) error
 }

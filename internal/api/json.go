@@ -30,6 +30,9 @@ func (r *Renderer) DecodeJSON(body io.ReadCloser, data any) error {
 func (r *Renderer) Json(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
+	if data == nil || data == http.NoBody {
+		return
+	}
 
 	// todo: understand why error is not written to response body
 	if err := json.NewEncoder(w).Encode(data); err != nil {

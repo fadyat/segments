@@ -29,6 +29,20 @@ func (e *BadRequestError) StatusCode() int {
 	return http.StatusBadRequest
 }
 
+type NotFoundError struct {
+	baseError
+}
+
+func NewNotFoundError(msg string) *NotFoundError {
+	return &NotFoundError{
+		baseError: baseError{Msg: msg},
+	}
+}
+
+func (e *NotFoundError) StatusCode() int {
+	return http.StatusNotFound
+}
+
 type ConflictError struct {
 	baseError
 }

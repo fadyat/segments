@@ -131,7 +131,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /user/{id}/segments:
+  /user/{id}/segment:
     put:
       tags:
         - segment
@@ -176,4 +176,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - segment
+      summary: Get user segments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id
+          schema:
+            type: string
+            example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+        - name: status
+          in: query
+          required: false
+          description: Segment status
+          schema:
+            type: string
+            example: 'active'
+            default: 'active'
+            enum: [ 'active' ]
+      responses:
+        '200':
+          description: User segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segment'
+        '400':
+          description: Invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 

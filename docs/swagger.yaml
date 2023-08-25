@@ -1,0 +1,73 @@
+openapi: 3.0.3
+info:
+  title: Segments API
+  description: Segments API
+  version: 1.0.0
+
+servers:
+  - url: 'http://localhost:8080/api/v1'
+    description: Local server
+
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: 'Something went wrong'
+    CreateSegment:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: 'AVITO_VOICE_MESSAGES'
+    Segment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+        slug:
+          type: string
+          example: 'AVITO_VOICE_MESSAGES'
+
+
+paths:
+  /segment:
+    post:
+      tags:
+        - segment
+      summary: Create a new segment
+      operationId: createSegment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSegment'
+      responses:
+        '201':
+          description: Segment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Segment'
+        '400':
+          description: Invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: An existing item already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

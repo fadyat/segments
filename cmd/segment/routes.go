@@ -5,6 +5,7 @@ import (
 	"avito-internship-2023/internal/api/middleware"
 	"avito-internship-2023/internal/handler/ping"
 	"avito-internship-2023/internal/handler/segment"
+	"avito-internship-2023/internal/handler/user"
 	"avito-internship-2023/internal/repository"
 	segmentRepo "avito-internship-2023/internal/repository/segment"
 	segmentSvc "avito-internship-2023/internal/service/segment"
@@ -23,13 +24,14 @@ func initRoutes(r *mux.Router, db *sqlx.DB) error {
 	pingHandler := ping.NewHandler(renderer)
 	pingHandler.Mount(r)
 
-	segmentHandler := segment.NewHandler(
-		segmentSvc.NewService(
-			segmentRepo.NewRepository(transactor),
-		),
-		renderer,
+	segmentService := segmentSvc.NewService(
+		segmentRepo.NewRepository(transactor),
 	)
+	segmentHandler := segment.NewHandler(segmentService, renderer)
 	segmentHandler.Mount(r)
+
+	userHandler := user.NewHandler(segmentService, renderer)
+	userHandler.Mount(r)
 
 	useMiddlewares(r)
 	return nil

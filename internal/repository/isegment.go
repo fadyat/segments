@@ -11,4 +11,6 @@ type ISegment interface {
 
 	NewSegment(ctx context.Context, segment *entity.Segment) (createdSegment *entity.Segment, err error)
 	DeleteSegment(ctx context.Context, id uuid.UUID) (err error)
+	JoinUserToSegments(ctx context.Context, userID uint64, slugs []string) error
+	LeaveUserFromSegments(ctx context.Context, userID uint64, slugs []string) error
 }

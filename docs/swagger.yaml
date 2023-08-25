@@ -142,8 +142,8 @@ paths:
           required: true
           description: User id
           schema:
-            type: string
-            example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+            type: number
+            example: 322
       requestBody:
         content:
           application/json:
@@ -186,8 +186,8 @@ paths:
           required: true
           description: User id
           schema:
-            type: string
-            example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+            type: number
+            example: 322
         - name: status
           in: query
           required: false

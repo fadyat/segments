@@ -23,6 +23,6 @@ func NewHandler(
 
 func (h *Handler) Mount(r *mux.Router) {
 	userRouter := r.PathPrefix("/user").Subrouter()
-	userRouter.HandleFunc("{id}/segment", h.updateUserSegments).Methods("PUT")
-	userRouter.HandleFunc("{id}/segment", h.getUserSegments).Methods("GET")
+	userRouter.HandleFunc("/{id}/segment", h.updateUserSegments).Methods("PUT")
+	userRouter.HandleFunc("/{id}/segment", h.getUserSegments).Methods("GET")
 }

@@ -42,3 +42,19 @@ func NewNotFoundError(msg string) *NotFoundError {
 func (e *NotFoundError) ToApiError() error {
 	return api.NewNotFoundError(e.msg)
 }
+
+type NotFoundMultiError struct {
+	baseError
+	args []string
+}
+
+func NewNotFoundMultiError(msg string, args ...string) *NotFoundMultiError {
+	return &NotFoundMultiError{
+		baseError: baseError{msg: msg},
+		args:      args,
+	}
+}
+
+func (e *NotFoundMultiError) ToApiError() error {
+	return api.NewUnprocessableEntityError(e.msg, e.args...)
+}

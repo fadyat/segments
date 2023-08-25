@@ -20,8 +20,11 @@ func (s *svc) DeleteSegment(ctx context.Context, id string) error {
 	})
 
 	var known repository.Error
-	if errors.As(e, &known) {
+	switch {
+	case errors.As(e, &known):
 		return known.ToApiError()
+	case e != nil:
+		return err
 	}
 
 	return nil

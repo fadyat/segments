@@ -12,7 +12,7 @@ import (
 func (s *svc) NewSegment(ctx context.Context, createSegment *dto.CreateSegment) (*dto.SegmentCreated, error) {
 	err := createSegment.Validate()
 	if err != nil {
-		return nil, api.NewUnprocessableEntityError(err.Error())
+		return nil, api.NewUnprocessableEntityError("validation error", err.Error())
 	}
 
 	var createdSegment *entity.Segment
@@ -26,8 +26,11 @@ func (s *svc) NewSegment(ctx context.Context, createSegment *dto.CreateSegment) 
 	})
 
 	var known repository.Error
-	if errors.As(e, &known) {
+	switch {
+	case errors.As(e, &known):
 		return nil, known.ToApiError()
+	case e != nil:
+		return nil, err
 	}
 
 	return createdSegment.ToSegmentCreatedDTO(), nil

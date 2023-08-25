@@ -80,7 +80,7 @@ func takeNonEmpty(fields []string) []string {
 	return nonEmpty
 }
 
-func NewUnprocessableEntityError(fields ...string) *UnprocessableEntityError {
+func NewUnprocessableEntityError(msg string, fields ...string) *UnprocessableEntityError {
 	var byNewLine = make([]string, 0, len(fields))
 	for _, field := range fields {
 		byNewLine = append(
@@ -90,7 +90,7 @@ func NewUnprocessableEntityError(fields ...string) *UnprocessableEntityError {
 	}
 
 	return &UnprocessableEntityError{
-		baseError: baseError{Msg: "unprocessable entity"},
+		baseError: baseError{Msg: msg},
 		Fields:    byNewLine,
 	}
 }

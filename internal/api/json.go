@@ -34,7 +34,6 @@ func (r *Renderer) Json(w http.ResponseWriter, status int, data any) {
 		return
 	}
 
-	// todo: understand why error is not written to response body
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		zap.L().Error("failed to encode json", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -47,7 +46,11 @@ func (r *Renderer) JsonError(w http.ResponseWriter, err error) {
 	var apiError Error
 	if ok := errors.As(err, &apiError); ok {
 		statusCode = apiError.StatusCode()
+	} else {
+		zap.L().Error("unknown error", zap.Error(err))
+		r.Json(w, statusCode, baseError{Msg: "unknown error"})
+		return
 	}
 
-	r.Json(w, statusCode, baseError{Msg: err.Error()})
+	r.Json(w, statusCode, apiError)
 }

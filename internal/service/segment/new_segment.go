@@ -12,7 +12,7 @@ import (
 func (s *svc) NewSegment(ctx context.Context, createSegment *dto.CreateSegment) (*dto.SegmentCreated, error) {
 	err := createSegment.Validate()
 	if err != nil {
-		return nil, api.NewBadRequestError(err.Error())
+		return nil, api.NewUnprocessableEntityError(err.Error())
 	}
 
 	var createdSegment *entity.Segment

@@ -1,6 +1,9 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type Error interface {
 	StatusCode() int
@@ -55,4 +58,39 @@ func NewConflictError(msg string) *ConflictError {
 
 func (e *ConflictError) StatusCode() int {
 	return http.StatusConflict
+}
+
+type UnprocessableEntityError struct {
+	baseError
+	Fields []string `json:"fields"`
+}
+
+func (e *UnprocessableEntityError) StatusCode() int {
+	return http.StatusUnprocessableEntity
+}
+
+func takeNonEmpty(fields []string) []string {
+	var nonEmpty = make([]string, 0, len(fields))
+	for _, field := range fields {
+		if field != "" {
+			nonEmpty = append(nonEmpty, field)
+		}
+	}
+
+	return nonEmpty
+}
+
+func NewUnprocessableEntityError(fields ...string) *UnprocessableEntityError {
+	var byNewLine = make([]string, 0, len(fields))
+	for _, field := range fields {
+		byNewLine = append(
+			byNewLine,
+			takeNonEmpty(strings.Split(field, "\n"))...,
+		)
+	}
+
+	return &UnprocessableEntityError{
+		baseError: baseError{Msg: "unprocessable entity"},
+		Fields:    byNewLine,
+	}
 }

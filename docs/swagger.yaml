@@ -17,6 +17,17 @@ components:
         error:
           type: string
           example: 'Something went wrong'
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: 'Validation error'
+        fields:
+          type: array
+          items:
+            type: string
+            example: 'slug is too short, min length is 3'
     CreateSegment:
       type: object
       properties:
@@ -32,6 +43,22 @@ components:
         slug:
           type: string
           example: 'AVITO_VOICE_MESSAGES'
+    UpdateUserSegments:
+      type: object
+      properties:
+        join:
+          type: array
+          description: List of segments names, which user should be added to
+          items:
+            type: string
+            example: 'AVITO_VOICE_MESSAGES'
+        leave:
+          type: array
+          description: List of segments names, which user should be removed from
+          items:
+            type: string
+            example: 'AVITO_VOICE_MESSAGES'
+
 
 
 paths:
@@ -40,7 +67,6 @@ paths:
       tags:
         - segment
       summary: Create a new segment
-      operationId: createSegment
       requestBody:
         content:
           application/json:
@@ -65,19 +91,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /segment/{id}:
     delete:
       tags:
         - segment
       summary: Delete segment by id
-      operationId: deleteSegment
       parameters:
         - name: id
           in: path
@@ -101,3 +131,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /user/{id}/segments:
+    put:
+      tags:
+        - segment
+      summary: Add/remove user to segments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id
+          schema:
+            type: string
+            example: '5f8b0b9b-1b9a-4e1a-8c0e-3b2b1b1b1b1b'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserSegments'
+      responses:
+        '204':
+          description: User segments updated
+        '400':
+          description: Invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+

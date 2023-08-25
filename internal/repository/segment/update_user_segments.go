@@ -57,7 +57,7 @@ func (r *repo) LeaveUserFromSegments(
 		err = r.leaveUserFromSegments(ctx, e, userID, slugs)
 		err = toSegmentError(err)
 	})
-	return nil
+	return
 }
 
 func (r *repo) leaveUserFromSegments(

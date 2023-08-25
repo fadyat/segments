@@ -26,5 +26,7 @@ run:
 lint:
 	@golangci-lint run --issues-exit-code 1 --print-issued-lines=true --config .golangci.yml ./...
 
+test:
+	@go test -v ./... -coverprofile=coverage.out
 
 .PHONY: psql run

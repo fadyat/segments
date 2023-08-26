@@ -9,44 +9,44 @@ import (
 )
 
 func (r *repo) getKnownSegmentsBySlugs(
-	ctx context.Context, e repository.Executor, slugs []string,
+	ctx context.Context, e repository.Executor, segments []*entity.UserSegment,
 ) ([]*entity.Segment, error) {
 	var (
 		queryBuilder strings.Builder
-		args         = make([]any, 0, len(slugs))
+		args         = make([]any, 0, len(segments))
 	)
 
-	queryBuilder.WriteString("select * from segment where slug in (")
-	for i, slug := range slugs {
+	queryBuilder.WriteString("select id, slug from segment where slug in (")
+	for i, segment := range segments {
 		if i != 0 {
 			queryBuilder.WriteString(", ")
 		}
 
 		queryBuilder.WriteString(fmt.Sprintf("$%d", i+1))
-		args = append(args, slug)
+		args = append(args, segment.Slug)
 	}
 
 	queryBuilder.WriteString(")")
 
-	var segments = make([]*entity.Segment, 0, len(slugs))
-	err := e.SelectContext(ctx, &segments, queryBuilder.String(), args...)
+	var knownSegments = make([]*entity.Segment, 0, len(segments))
+	err := e.SelectContext(ctx, &knownSegments, queryBuilder.String(), args...)
 	if err != nil {
 		return nil, err
 	}
 
-	return segments, nil
+	return knownSegments, nil
 }
 
-func (r *repo) getUnknownSlugs(knownSegments []*entity.Segment, slugs []string) []string {
+func (r *repo) getUnknownSlugs(knownSegments []*entity.Segment, segments []*entity.UserSegment) []string {
 	knownSlugsMap := make(map[string]bool, len(knownSegments))
 	for _, segment := range knownSegments {
 		knownSlugsMap[segment.Slug] = true
 	}
 
 	var unknownSlugs = make([]string, 0)
-	for _, slug := range slugs {
-		if _, ok := knownSlugsMap[slug]; !ok {
-			unknownSlugs = append(unknownSlugs, slug)
+	for _, segment := range segments {
+		if _, ok := knownSlugsMap[segment.Slug]; !ok {
+			unknownSlugs = append(unknownSlugs, segment.Slug)
 		}
 	}
 

@@ -79,6 +79,16 @@ components:
         happened_at:
           type: string
           example: '2020-10-19T12:00:00Z'
+    JoinSegmentWithTTL:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: 'AVITO_VOICE_MESSAGES'
+        ttl:
+          type: number
+          description: ttl in days
+          example: 1
 
 paths:
   /segment:
@@ -228,6 +238,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /user/{id}/segment/ttl:
+    post:
+      tags:
+        - segment
+      summary: Set user segments with TTL
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id
+          schema:
+            type: number
+            example: 322
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JoinSegmentWithTTL'
+      responses:
+        '204':
+          description: User segments ttl updated
+        '400':
+          description: Invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
         '500':
           description: Internal server error
           content:

@@ -12,6 +12,7 @@ type UserSegment struct {
 	Slug     string     `db:"segment_slug"`
 	JoinedAt *time.Time `db:"joined_at"`
 	LeftAt   *time.Time `db:"left_at"`
+	DueAt    *time.Time `db:"due_at"`
 }
 
 func (s *UserSegment) ToUserSegmentDTO() *dto.UserSegment {

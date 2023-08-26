@@ -28,7 +28,9 @@ func (r *repo) getUserSegments(
 		       joined_at as joined_at
 		from segment s
 		join user_segment us on s.id = us.segment_id
-		where us.user_id = $1 and us.left_at is null
+		where us.user_id = $1 and
+		      us.left_at is null and
+		      (us.due_at is null or us.due_at > now())
 	`
 
 	segments := make([]*entity.UserSegment, 0)

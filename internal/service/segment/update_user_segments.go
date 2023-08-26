@@ -3,6 +3,7 @@ package segment
 import (
 	"avito-internship-2023/internal/api"
 	"avito-internship-2023/internal/dto"
+	"avito-internship-2023/internal/entity"
 	"avito-internship-2023/internal/repository"
 	"context"
 	"database/sql"
@@ -30,14 +31,24 @@ func (s *svc) UpdateUserSegments(
 	txOpts := &sql.TxOptions{Isolation: sql.LevelSerializable, ReadOnly: false}
 	e := s.segmentRepository.RunTx(ctx, txOpts, func(ctx context.Context) error {
 		if updateUserSegmentsDTO.CanJoin() {
-			err = s.segmentRepository.JoinUserToSegments(ctx, id, updateUserSegmentsDTO.JoinSegments)
+			var joinSegments = make([]*entity.UserSegment, 0, len(updateUserSegmentsDTO.JoinSegments))
+			for _, slug := range updateUserSegmentsDTO.JoinSegments {
+				joinSegments = append(joinSegments, &entity.UserSegment{Slug: slug, DueAt: nil})
+			}
+
+			err = s.segmentRepository.JoinUserToSegments(ctx, id, joinSegments)
 			if err != nil {
 				return err
 			}
 		}
 
 		if updateUserSegmentsDTO.CanLeave() {
-			err = s.segmentRepository.LeaveUserFromSegments(ctx, id, updateUserSegmentsDTO.LeaveSegments)
+			var leaveSegments = make([]*entity.UserSegment, 0, len(updateUserSegmentsDTO.LeaveSegments))
+			for _, slug := range updateUserSegmentsDTO.LeaveSegments {
+				leaveSegments = append(leaveSegments, &entity.UserSegment{Slug: slug})
+			}
+
+			err = s.segmentRepository.LeaveUserFromSegments(ctx, id, leaveSegments)
 			if err != nil {
 				return err
 			}

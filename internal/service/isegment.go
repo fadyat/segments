@@ -21,4 +21,9 @@ type ISegment interface {
 	// GetHistoryReport is a method that returns history report for
 	// year-month period.
 	GetHistoryReport(ctx context.Context, period string) (*dto.HistoryReportList, error)
+
+	// JoinSegmentsWithTTL is a method that joins user to segments with ttl.
+	//
+	// Example: user want to join in ABOBA segment for 10 days.
+	JoinSegmentsWithTTL(context.Context, string, []*dto.SegmentWithTTL) error
 }

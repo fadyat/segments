@@ -1,6 +1,7 @@
 package segment
 
 import (
+	"avito-internship-2023/internal/entity"
 	"avito-internship-2023/internal/repository"
 	"context"
 	"fmt"
@@ -8,41 +9,41 @@ import (
 )
 
 func (r *repo) JoinUserToSegments(
-	ctx context.Context, userID uint64, slugs []string,
+	ctx context.Context, userID uint64, segments []*entity.UserSegment,
 ) (err error) {
 	r.UseTx(ctx, func(e repository.Executor) {
-		err = r.joinUserToSegments(ctx, e, userID, slugs)
+		err = r.joinUserToSegments(ctx, e, userID, segments)
 		err = toSegmentError(err)
 	})
 	return
 }
 
 func (r *repo) joinUserToSegments(
-	ctx context.Context, e repository.Executor, userID uint64, slugs []string,
+	ctx context.Context, e repository.Executor, userID uint64, segments []*entity.UserSegment,
 ) (err error) {
-	knownSegments, err := r.getKnownSegmentsBySlugs(ctx, e, slugs)
+	knownSegments, err := r.getKnownSegmentsBySlugs(ctx, e, segments)
 	if err != nil {
 		return err
 	}
 
-	unknownSlugs := r.getUnknownSlugs(knownSegments, slugs)
+	unknownSlugs := r.getUnknownSlugs(knownSegments, segments)
 	if len(unknownSlugs) > 0 {
 		return repository.NewNotFoundMultiError("invalid join segments", unknownSlugs...)
 	}
 
 	var (
 		queryBuilder strings.Builder
-		args         = make([]any, 0, 2*len(knownSegments))
+		args         = make([]any, 0, 3*len(knownSegments))
 	)
 
-	queryBuilder.WriteString("insert into user_segment (user_id, segment_id) values ")
+	queryBuilder.WriteString("insert into user_segment (user_id, segment_id, due_at) values ")
 	for i, segment := range knownSegments {
 		if i != 0 {
 			queryBuilder.WriteString(", ")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf("($%d, $%d)", 2*i+1, 2*i+2))
-		args = append(args, userID, segment.ID)
+		queryBuilder.WriteString(fmt.Sprintf("($%d, $%d, $%d)", 3*i+1, 3*i+2, 3*i+3))
+		args = append(args, userID, segment.ID, segments[i].DueAt)
 	}
 
 	queryBuilder.WriteString(" on conflict (user_id, segment_id) do nothing")
@@ -51,24 +52,24 @@ func (r *repo) joinUserToSegments(
 }
 
 func (r *repo) LeaveUserFromSegments(
-	ctx context.Context, userID uint64, slugs []string,
+	ctx context.Context, userID uint64, segments []*entity.UserSegment,
 ) (err error) {
 	r.UseTx(ctx, func(e repository.Executor) {
-		err = r.leaveUserFromSegments(ctx, e, userID, slugs)
+		err = r.leaveUserFromSegments(ctx, e, userID, segments)
 		err = toSegmentError(err)
 	})
 	return
 }
 
 func (r *repo) leaveUserFromSegments(
-	ctx context.Context, e repository.Executor, userID uint64, slugs []string,
+	ctx context.Context, e repository.Executor, userID uint64, segments []*entity.UserSegment,
 ) (err error) {
-	knownSegments, err := r.getKnownSegmentsBySlugs(ctx, e, slugs)
+	knownSegments, err := r.getKnownSegmentsBySlugs(ctx, e, segments)
 	if err != nil {
 		return err
 	}
 
-	unknownSlugs := r.getUnknownSlugs(knownSegments, slugs)
+	unknownSlugs := r.getUnknownSlugs(knownSegments, segments)
 	if len(unknownSlugs) > 0 {
 		return repository.NewNotFoundMultiError("invalid leave segments", unknownSlugs...)
 	}
@@ -87,7 +88,7 @@ func (r *repo) leaveUserFromSegments(
 		args = append(args, userID, segment.ID)
 	}
 
-	queryBuilder.WriteString(")")
+	queryBuilder.WriteString(") and left_at is null")
 	_, err = e.ExecContext(ctx, queryBuilder.String(), args...)
 	return err
 }

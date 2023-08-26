@@ -94,3 +94,10 @@ func (hrl *HistoryReportList) ToRawTable() [][]string {
 
 	return table
 }
+
+type SegmentWithTTL struct {
+	Slug string `json:"slug"`
+
+	// TTL in days.
+	TTL int `json:"ttl"`
+}

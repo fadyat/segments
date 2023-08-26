@@ -16,7 +16,7 @@ func (s *svc) NewSegment(ctx context.Context, createSegment *dto.CreateSegment) 
 	}
 
 	var createdSegment *entity.Segment
-	e := s.segmentRepository.RunTransaction(ctx, nil, func(ctx context.Context) error {
+	e := s.segmentRepository.RunTx(ctx, nil, func(ctx context.Context) error {
 		createdSegment, err = s.segmentRepository.NewSegment(ctx, entity.NewSegment(createSegment.Slug))
 		if err != nil {
 			return err

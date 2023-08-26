@@ -77,7 +77,7 @@ func (r *repo) leaveUserFromSegments(
 		queryBuilder strings.Builder
 		args         = make([]any, 0, 2*len(knownSegments))
 	)
-	queryBuilder.WriteString("delete from user_segment where (user_id, segment_id) in (")
+	queryBuilder.WriteString("update user_segment set left_at = now() where (user_id, segment_id) in (")
 	for i, segment := range knownSegments {
 		if i != 0 {
 			queryBuilder.WriteString(", ")

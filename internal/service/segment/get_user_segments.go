@@ -12,8 +12,8 @@ import (
 	"strconv"
 )
 
-func (s *svc) GetUserSegments(
-	ctx context.Context, status dto.UserSegmentStatus, userID string,
+func (s *svc) GetActiveUserSegments(
+	ctx context.Context, userID string,
 ) ([]*dto.UserSegment, error) {
 	id, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
@@ -24,10 +24,10 @@ func (s *svc) GetUserSegments(
 		return nil, api.NewBadRequestError("id must be positive")
 	}
 
-	var segments []*entity.Segment
+	var segments []*entity.UserSegment
 	txOpts := &sql.TxOptions{Isolation: sql.LevelSerializable, ReadOnly: false}
-	e := s.segmentRepository.RunTransaction(ctx, txOpts, func(ctx context.Context) error {
-		segments, err = s.segmentRepository.GetUserSegments(ctx, status, id)
+	e := s.segmentRepository.RunTx(ctx, txOpts, func(ctx context.Context) error {
+		segments, err = s.segmentRepository.GetActiveUserSegments(ctx, id)
 		return err
 	})
 

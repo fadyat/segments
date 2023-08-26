@@ -22,5 +22,5 @@ func (h *Handler) updateUserSegments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.r.Json(w, http.StatusOK, http.NoBody)
+	h.r.Json(w, http.StatusNoContent, http.NoBody)
 }

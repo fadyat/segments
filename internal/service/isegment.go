@@ -15,7 +15,10 @@ type ISegment interface {
 	// If there's no such segment, and validation error will be returned.
 	UpdateUserSegments(context.Context, string, *dto.UpdateUserSegments) error
 
-	// GetUserSegments is a method that returns user segments
-	// filtered by status and sorted by slug.
-	GetUserSegments(context.Context, dto.UserSegmentStatus, string) ([]*dto.UserSegment, error)
+	// GetActiveUserSegments is a method that returns all active user segments.
+	GetActiveUserSegments(context.Context, string) ([]*dto.UserSegment, error)
+
+	// GetHistoryReport is a method that returns history report for
+	// year-month period.
+	GetHistoryReport(ctx context.Context, period string) (*dto.HistoryReportList, error)
 }

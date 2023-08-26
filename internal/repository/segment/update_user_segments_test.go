@@ -1,7 +1,6 @@
 package segment
 
 import (
-	"avito-internship-2023/internal/dto"
 	"avito-internship-2023/internal/entity"
 	"avito-internship-2023/internal/repository"
 	"context"
@@ -17,7 +16,7 @@ type updateUserSegmentsTestCase struct {
 
 func (s *SegmentRepoSuite) TestRepo_JoinUserToSegments() {
 	validate := func(s *SegmentRepoSuite, userID uint64, slugs []string) {
-		segments, err := s.r.GetUserSegments(context.Background(), dto.Active, userID)
+		segments, err := s.r.GetActiveUserSegments(context.Background(), userID)
 		s.Require().NoError(err)
 		s.Require().Equal(len(slugs), len(segments))
 
@@ -76,7 +75,7 @@ func (s *SegmentRepoSuite) TestRepo_JoinUserToSegments() {
 
 func (s *SegmentRepoSuite) TestRepo_LeaveUserFromSegments() {
 	validate := func(s *SegmentRepoSuite, userID uint64, slugs []string) {
-		segments, err := s.r.GetUserSegments(context.Background(), dto.Active, userID)
+		segments, err := s.r.GetActiveUserSegments(context.Background(), userID)
 		s.Require().NoError(err)
 		s.Require().Equal(len(slugs), len(segments))
 

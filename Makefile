@@ -29,4 +29,13 @@ lint:
 test:
 	@go test -v ./... -coverprofile=coverage.out
 
+fill:
+	@curl -s -X POST -H "Content-Type: application/json" -d '{"slug":"test"}' 'http://localhost:8080/api/v1/segment' | jq
+	@curl -s -X POST -H "Content-Type: application/json" -d '{"slug":"test2"}' 'http://localhost:8080/api/v1/segment' | jq
+	@curl -s -X POST -H "Content-Type: application/json" -d '{"slug":"test3"}' 'http://localhost:8080/api/v1/segment' | jq
+	@curl -s -X PUT -H "Content-Type: application/json" -d '{"join": ["test", "test2"]}' 'http://localhost:8080/api/v1/user/322/segment'
+	@curl -s -H "Content-Type: application/json" 'http://localhost:8080/api/v1/user/322/segment' | jq
+	@curl -s 'http://localhost:8080/api/v1/segment/report?time_range=2023-08&format=json' | jq
+
+
 .PHONY: psql run

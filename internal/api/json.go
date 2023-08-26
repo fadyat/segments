@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"go.uber.org/zap"
@@ -37,6 +38,38 @@ func (r *Renderer) Json(w http.ResponseWriter, status int, data any) {
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		zap.L().Error("failed to encode json", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (r *Renderer) Csv(w http.ResponseWriter, status int, data any) {
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment; filename=report.csv")
+	w.WriteHeader(status)
+	if data == nil || data == http.NoBody {
+		return
+	}
+
+	writer := csv.NewWriter(w)
+	defer func() {
+		writer.Flush()
+		if err := writer.Error(); err != nil {
+			zap.L().Error("failed to flush csv writer", zap.Error(err))
+		}
+	}()
+
+	tableRows, ok := data.([][]string)
+	if !ok {
+		zap.L().Error("failed to cast data to [][]string")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for _, row := range tableRows {
+		if err := writer.Write(row); err != nil {
+			zap.L().Error("failed to write row", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

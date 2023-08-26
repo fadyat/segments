@@ -18,25 +18,25 @@ const (
 // It is implemented by the repository package and can be used in the underlying repository functions.
 type Transactor interface {
 
-	// RunTransaction runs the given function in a transaction, rolling back if an error is returned.
+	// RunTx runs the given function in a transaction, rolling back if an error is returned.
 	//
 	// The function is passed a context with a transaction value, which should be used for all database
 	// operations.
 	//
 	// Usage example:
 	//
-	// 	err := r.RunTransaction(context.Background(), nil, func(ctx context.Context) error {
+	// 	err := r.RunTx(context.Background(), nil, func(ctx context.Context) error {
 	//		// do repository operations, using ctx to get the transaction
 	// 		return nil
 	// 	})
 	//
-	RunTransaction(context.Context, *sql.TxOptions, func(context.Context) error) error
+	RunTx(context.Context, *sql.TxOptions, func(context.Context) error) error
 
 	// UseTx runs the given function with the existing transaction or using sqlx.DB if transaction is nil.
 	//
 	// Usage example:
 	//
-	// err := r.RunTransaction(context.Background(), nil, func(ctx context.Context) error {
+	// err := r.RunTx(context.Background(), nil, func(ctx context.Context) error {
 	// 		r.UseTx(ctx, func(executor repository.Executor) {
 	// 			// do repository operations, using executor to execute queries
 	// 		})
@@ -77,7 +77,7 @@ func NewTransactor(db *sqlx.DB) Transactor {
 	return &transactor{db: db}
 }
 
-func (t *transactor) RunTransaction(
+func (t *transactor) RunTx(
 	ctx context.Context, level *sql.TxOptions, f func(context.Context) error,
 ) error {
 	tx, err := t.db.BeginTxx(ctx, level)

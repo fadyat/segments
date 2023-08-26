@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -60,27 +61,36 @@ type UserSegment struct {
 	Slug string `json:"slug"`
 }
 
-type UserSegmentStatus bool
+type HistoryReport struct {
+	UserID uint64 `json:"user_id"`
+	Slug   string `json:"slug"`
 
-func NewUserSegmentStatus(
-	status string,
-	defaultStatus ...UserSegmentStatus,
-) UserSegmentStatus {
-	switch status {
-	case "active":
-		return Active
-	case "inactive":
-		return Inactive
-	}
+	// OperationType is one of "join" or "leave".
+	OperationType string `json:"operation_type"`
 
-	if len(defaultStatus) > 0 {
-		return defaultStatus[0]
-	}
-
-	return Active
+	// HappenedAt is a timestamp in RFC3339 format.
+	HappenedAt string `json:"happened_at"`
 }
 
-const (
-	Active   UserSegmentStatus = true
-	Inactive UserSegmentStatus = false
-)
+type HistoryReportList struct {
+	Segments []*HistoryReport
+}
+
+func (hrl *HistoryReportList) MarshalJSON() ([]byte, error) {
+	return json.Marshal(hrl.Segments)
+}
+
+func (hrl *HistoryReportList) ToRawTable() [][]string {
+	var table = make([][]string, len(hrl.Segments)+1)
+	table[0] = []string{"user_id", "slug", "operation_type", "happened_at"}
+	for i, segment := range hrl.Segments {
+		table[i+1] = []string{
+			fmt.Sprintf("%d", segment.UserID),
+			segment.Slug,
+			segment.OperationType,
+			segment.HappenedAt,
+		}
+	}
+
+	return table
+}

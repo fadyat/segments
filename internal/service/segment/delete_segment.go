@@ -15,7 +15,7 @@ func (s *svc) DeleteSegment(ctx context.Context, id string) error {
 		return api.NewBadRequestError(fmt.Sprintf("invalid id format: %s", id))
 	}
 
-	e := s.segmentRepository.RunTransaction(ctx, nil, func(ctx context.Context) error {
+	e := s.segmentRepository.RunTx(ctx, nil, func(ctx context.Context) error {
 		return s.segmentRepository.DeleteSegment(ctx, uid)
 	})
 

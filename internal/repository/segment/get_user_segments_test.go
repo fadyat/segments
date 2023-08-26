@@ -1,18 +1,27 @@
 package segment
 
 import (
-	"avito-internship-2023/internal/dto"
 	"avito-internship-2023/internal/entity"
 	"context"
 )
 
 type getUserSegmentsTestCase struct {
-	name     string
-	preSlugs []string
-	pre      func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase)
-	status   dto.UserSegmentStatus
-	userID   uint64
-	expErr   error
+	name       string
+	preSlugs   []string
+	leaveSlugs []string
+	pre        func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase)
+	userID     uint64
+	expErr     error
+}
+
+func contains(slugs []string, slug string) bool {
+	for _, s := range slugs {
+		if s == slug {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
@@ -30,12 +39,27 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preSlugs)
 				s.Require().NoError(err)
 			},
-			status: dto.Active,
 		},
 		{
 			name:     "success zero segments",
-			status:   dto.Active,
 			preSlugs: make([]string, 0),
+		},
+		{
+			name: "have left segments",
+			pre: func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase) {
+				for _, slug := range tc.preSlugs {
+					_, err := s.r.NewSegment(context.Background(), entity.NewSegment(slug))
+					s.Require().NoError(err)
+				}
+
+				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preSlugs)
+				s.Require().NoError(err)
+
+				err = s.r.LeaveUserFromSegments(context.Background(), tc.userID, tc.leaveSlugs)
+				s.Require().NoError(err)
+			},
+			preSlugs:   []string{"aboba", "bebra", "kekis"},
+			leaveSlugs: []string{"aboba"},
 		},
 	}
 
@@ -45,17 +69,26 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 				tc.pre(s, &tc)
 			}
 
-			segments, err := s.r.GetUserSegments(context.Background(), tc.status, tc.userID)
+			segments, err := s.r.GetActiveUserSegments(context.Background(), tc.userID)
 			if tc.expErr != nil {
 				s.Require().Equal(tc.expErr, err)
 				return
 			}
 
-			s.Require().NoError(err)
-			s.Require().Equal(len(tc.preSlugs), len(segments))
-			for _, segment := range segments {
-				s.Require().Contains(tc.preSlugs, segment.Slug)
+			activeSlugs := make([]string, 0, len(tc.preSlugs))
+			for _, slug := range tc.preSlugs {
+				if !contains(tc.leaveSlugs, slug) {
+					activeSlugs = append(activeSlugs, slug)
+				}
 			}
+
+			s.Require().NoError(err)
+			s.Require().Equal(len(activeSlugs), len(segments))
+			for _, segment := range segments {
+				s.Require().Contains(activeSlugs, segment.Slug)
+			}
+
+			s.clean()
 		})
 	}
 }

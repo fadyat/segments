@@ -28,7 +28,7 @@ func (s *svc) UpdateUserSegments(
 	}
 
 	txOpts := &sql.TxOptions{Isolation: sql.LevelSerializable, ReadOnly: false}
-	e := s.segmentRepository.RunTransaction(ctx, txOpts, func(ctx context.Context) error {
+	e := s.segmentRepository.RunTx(ctx, txOpts, func(ctx context.Context) error {
 		if updateUserSegmentsDTO.CanJoin() {
 			err = s.segmentRepository.JoinUserToSegments(ctx, id, updateUserSegmentsDTO.JoinSegments)
 			if err != nil {

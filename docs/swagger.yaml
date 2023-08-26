@@ -64,7 +64,21 @@ components:
         slug:
           type: string
           example: 'AVITO_VOICE_MESSAGES'
-
+    HistoryReport:
+      type: object
+      properties:
+        user_id:
+          type: number
+          example: 322
+        slug:
+          type: string
+          example: 'AVITO_VOICE_MESSAGES'
+        operation_type:
+          type: string
+          example: 'join'
+        happened_at:
+          type: string
+          example: '2020-10-19T12:00:00Z'
 
 paths:
   /segment:
@@ -193,15 +207,6 @@ paths:
           schema:
             type: number
             example: 322
-        - name: status
-          in: query
-          required: false
-          description: Segment status
-          schema:
-            type: string
-            example: 'active'
-            default: 'active'
-            enum: [ 'active' ]
       responses:
         '200':
           description: User segments
@@ -229,6 +234,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-
+  /segment/report:
+    get:
+      tags:
+        - segment
+      summary: Get history report
+      parameters:
+        - name: time_range
+          in: query
+          required: true
+          description: Time range
+          schema:
+            type: string
+            description: Time range in format YYYY-MM
+            example: '2023-08'
+        - name: format
+          in: query
+          required: false
+          description: Report format
+          schema:
+            type: string
+            enum: [ csv, json ]
+            default: csv
+      responses:
+        '200':
+          description: History report for specified time range
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryReport'
+        '400':
+          description: Invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 

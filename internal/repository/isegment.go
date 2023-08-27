@@ -15,6 +15,7 @@ type ISegment interface {
 
 	JoinUserToSegments(ctx context.Context, userID uint64, segments []*entity.UserSegment) error
 	LeaveUserFromSegments(ctx context.Context, userID uint64, segments []*entity.UserSegment) error
+	LeftExpiredSegments(context.Context) (int, error)
 
 	GetActiveUserSegments(ctx context.Context, userID uint64) (segments []*entity.UserSegment, err error)
 

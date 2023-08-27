@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 )
 
 var (
@@ -109,10 +110,15 @@ func main() {
 		}
 	}()
 
+	// launching marking expired segments as left
+	backgroundJobsDoneCh := runBackgroundJobs(db, time.Minute)
+
 	stopContext, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer stop()
 
 	<-stopContext.Done()
+	close(backgroundJobsDoneCh)
+
 	zap.L().Info("stopping server")
 	if e := server.Shutdown(context.Background()); e != nil {
 		zap.L().Fatal("failed to stop server", zap.Error(e))

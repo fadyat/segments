@@ -1,6 +1,24 @@
 version: '3.7'
 
 services:
+  api:
+    container_name: segments-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VERSION="dev-compose"
+        - MIGRATIONS_PATH="./migrations/postgres"
+    environment:
+      DB_DSN: "postgres://postgres:postgres@psql:5432/postgres?sslmode=disable"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/m
+      - .:/app
+    networks:
+      - segments
+
   psql:
     image: postgres:14.5-alpine
     shm_size: 1g
@@ -12,6 +30,26 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - ./postgresql_data:/var/lib/postgresql/data
+    networks:
+      - segments
+
+  tests:
+    container_name: segments-tests
+    image: golang:1.21-alpine
+    environment:
+      TEST_DATABASE_DSN: postgres://postgres:postgres@psql:5432/postgres?sslmode=disable
+      TEST_DATABASE_DRIVER: postgres
+      TEST_DATABASE_MIGRATIONS_PATH: file://../../../migrations/postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: go test -v ./...
+    networks:
+      - segments
 
 volumes:
   postgresql_data:
+
+networks:
+  segments:
+    driver: bridge

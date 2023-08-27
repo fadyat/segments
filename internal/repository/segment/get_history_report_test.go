@@ -4,6 +4,7 @@ import (
 	"avito-internship-2023/internal/entity"
 	"context"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -207,6 +208,15 @@ func (s *SegmentRepoSuite) TestRepo_GetSegmentsByLeftAt() {
 			segments, err := s.r.GetSegmentsByLeftAt(context.Background(), tc.period)
 			s.Require().NoError(err)
 			s.Require().Equal(len(tc.expectedSegments), len(segments))
+
+			// doing sort, because database insert to fast and they return in incorrect order
+			sort.Slice(segments, func(i, j int) bool {
+				return segments[i].Slug < segments[j].Slug
+			})
+
+			sort.Slice(tc.expectedSegments, func(i, j int) bool {
+				return tc.expectedSegments[i].Slug < tc.expectedSegments[j].Slug
+			})
 
 			for i := range segments {
 				s.Require().Equal(tc.expectedSegments[i].Slug, segments[i].Slug)

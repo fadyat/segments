@@ -24,7 +24,7 @@ func (s *svc) DeleteSegment(ctx context.Context, id string) error {
 	case errors.As(e, &known):
 		return known.ToApiError()
 	case e != nil:
-		return err
+		return e
 	}
 
 	return nil

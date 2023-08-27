@@ -62,7 +62,7 @@ func (s *svc) UpdateUserSegments(
 	case errors.As(e, &known):
 		return known.ToApiError()
 	case e != nil:
-		return err
+		return e
 	}
 
 	return nil

@@ -36,7 +36,7 @@ func (s *svc) GetActiveUserSegments(
 	case errors.As(e, &known):
 		return nil, known.ToApiError()
 	case e != nil:
-		return nil, err
+		return nil, e
 	}
 
 	var dtoSegments = make([]*dto.UserSegment, 0, len(segments))

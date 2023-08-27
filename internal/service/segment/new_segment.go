@@ -31,7 +31,7 @@ func (s *svc) NewSegment(ctx context.Context, createSegment *dto.CreateSegment) 
 	case errors.As(e, &known):
 		return nil, known.ToApiError()
 	case e != nil:
-		return nil, err
+		return nil, e
 	}
 
 	return createdSegment.ToSegmentCreatedDTO(), nil

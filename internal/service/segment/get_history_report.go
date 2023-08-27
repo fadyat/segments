@@ -43,7 +43,7 @@ func (s *svc) GetHistoryReport(ctx context.Context, period string) (*dto.History
 	case errors.As(e, &known):
 		return nil, known.ToApiError()
 	case e != nil:
-		return nil, err
+		return nil, e
 	}
 
 	dtoSegments := make([]*dto.HistoryReport, 0, len(joinAtSegments)+len(leftAtSegments))

@@ -18,9 +18,20 @@ func (r *repo) DeleteSegment(ctx context.Context, id uuid.UUID) (err error) {
 func (r *repo) deleteSegment(
 	ctx context.Context, executor repository.Executor, id uuid.UUID,
 ) error {
+	deleteUserSegmentQuery := `
+		delete from user_segment
+		where segment_id = $1
+	`
+
+	_, err := executor.ExecContext(ctx, deleteUserSegmentQuery, id)
+	if err != nil {
+		return err
+	}
+
 	deleteQuery := `
 		delete from segment
-		where id = $1`
+		where id = $1	
+	`
 
 	result, err := executor.ExecContext(ctx, deleteQuery, id)
 	if err != nil {

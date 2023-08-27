@@ -51,7 +51,7 @@ func (s *svc) JoinSegmentsWithTTL(
 	case errors.As(e, &known):
 		return known.ToApiError()
 	case e != nil:
-		return err
+		return e
 	}
 
 	return nil

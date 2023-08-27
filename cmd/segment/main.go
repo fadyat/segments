@@ -17,7 +17,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
 )
 
 var (
@@ -97,21 +96,17 @@ func initServer(router *mux.Router) *http.Server {
 func main() {
 	initLogger()
 	db := initDatabase()
+	backgroundJobsDoneCh := runBackgroundJobs(db)
 
-	router := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
-	if e := initRoutes(router, db); e != nil {
-		zap.L().Fatal("failed to init routes", zap.Error(e))
-	}
+	v1 := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
+	initRoutes(v1, db)
 
-	server := initServer(router)
+	server := initServer(v1)
 	go func() {
 		if e := server.ListenAndServe(); e != nil && !errors.Is(e, http.ErrServerClosed) {
 			zap.L().Fatal("failed to start server", zap.Error(e))
 		}
 	}()
-
-	// launching marking expired segments as left
-	backgroundJobsDoneCh := runBackgroundJobs(db, time.Minute)
 
 	stopContext, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer stop()

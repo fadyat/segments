@@ -34,6 +34,11 @@ components:
         slug:
           type: string
           example: 'AVITO_VOICE_MESSAGES'
+        auto_distribution_percent:
+          type: number
+          description: which percent of users should be added to segment automatically
+          example: 50
+          default: 0
     Segment:
       type: object
       properties:

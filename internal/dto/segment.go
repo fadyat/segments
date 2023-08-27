@@ -6,7 +6,8 @@ import (
 )
 
 type CreateSegment struct {
-	Slug string `json:"slug"`
+	Slug                    string `json:"slug"`
+	AutoDistributionPercent int    `json:"auto_distribution_percent"`
 }
 
 func (c *CreateSegment) Validate() error {
@@ -19,6 +20,14 @@ func (c *CreateSegment) Validate() error {
 		errorBuilder.WriteString("slug is too long, max length is 300\n")
 	}
 
+	if c.AutoDistributionPercent < 0 {
+		errorBuilder.WriteString("auto_distribution_percent must be greater than 0\n")
+	}
+
+	if c.AutoDistributionPercent > 100 {
+		errorBuilder.WriteString("auto_distribution_percent must be less than 100\n")
+	}
+
 	if errorBuilder.Len() > 0 {
 		return errors.New(errorBuilder.String())
 	}
@@ -27,6 +36,7 @@ func (c *CreateSegment) Validate() error {
 }
 
 type SegmentCreated struct {
-	ID   string `json:"id"`
-	Slug string `json:"slug"`
+	ID                      string `json:"id"`
+	Slug                    string `json:"slug"`
+	AutoDistributionPercent int    `json:"auto_distribution_percent"`
 }

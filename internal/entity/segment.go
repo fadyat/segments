@@ -6,20 +6,23 @@ import (
 )
 
 type Segment struct {
-	ID   uuid.UUID `json:"id"`
-	Slug string    `json:"slug"`
+	ID                      uuid.UUID `db:"id"`
+	Slug                    string    `db:"slug"`
+	AutoDistributionPercent int       `db:"auto_distribution_percent"`
 }
 
-func NewSegment(slug string) *Segment {
+func NewSegment(slug string, autoDistributionPercent int) *Segment {
 	return &Segment{
-		ID:   uuid.New(),
-		Slug: slug,
+		ID:                      uuid.New(),
+		Slug:                    slug,
+		AutoDistributionPercent: autoDistributionPercent,
 	}
 }
 
 func (s *Segment) ToSegmentCreatedDTO() *dto.SegmentCreated {
 	return &dto.SegmentCreated{
-		ID:   s.ID.String(),
-		Slug: s.Slug,
+		ID:                      s.ID.String(),
+		Slug:                    s.Slug,
+		AutoDistributionPercent: s.AutoDistributionPercent,
 	}
 }

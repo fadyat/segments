@@ -20,10 +20,10 @@ func (r *repo) newSegment(
 	ctx context.Context, executor repository.Executor, segment *entity.Segment,
 ) (*entity.Segment, error) {
 	insertQuery := `
-		insert into segment (id, slug)
-		values ($1, $2)`
+		insert into segment (id, slug, auto_distribution_percent)
+		values ($1, $2, $3)`
 
-	_, err := executor.ExecContext(ctx, insertQuery, segment.ID, segment.Slug)
+	_, err := executor.ExecContext(ctx, insertQuery, segment.ID, segment.Slug, segment.AutoDistributionPercent)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 
 type CreateSegment struct {
 	Slug                    string `json:"slug"`
-	AutoDistributionPercent int    `json:"auto_distribution_percent"`
+	AutoDistributionPercent int    `json:"auto_distribution_percent,omitempty"`
 }
 
 func (c *CreateSegment) Validate() error {

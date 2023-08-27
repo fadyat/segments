@@ -41,5 +41,7 @@ fill:
 	@curl -s -H "Content-Type: application/json" 'http://localhost:8080/api/v1/user/322/segment' | jq
 	@curl -s 'http://localhost:8080/api/v1/segment/report?time_range=2023-08&format=json' | jq
 
+mocks:
+	@mockery --name ISegment --dir internal/service --output mocks --filename segment.go --outpkg mocks
 
-.PHONY: psql run
+.PHONY: psql run mocks

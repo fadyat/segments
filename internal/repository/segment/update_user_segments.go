@@ -46,7 +46,7 @@ func (r *repo) joinUserToSegments(
 		args = append(args, userID, segment.ID, segments[i].DueAt)
 	}
 
-	queryBuilder.WriteString(" on conflict (user_id, segment_id) do nothing")
+	queryBuilder.WriteString(" on conflict (user_id, segment_id) where left_at is null do nothing")
 	_, err = e.ExecContext(ctx, queryBuilder.String(), args...)
 	return err
 }

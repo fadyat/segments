@@ -19,7 +19,6 @@ type newSegmentTestCase struct {
 	pre            func(s *segmentHandlerSuite, tc *newSegmentTestCase)
 	expected       any
 	expectedStatus int
-	expErr         error
 }
 
 func (s *segmentHandlerSuite) TestNewSegmentHandler() {

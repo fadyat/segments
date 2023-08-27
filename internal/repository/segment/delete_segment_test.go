@@ -7,17 +7,20 @@ import (
 	"github.com/google/uuid"
 )
 
+type deleteSegmentTestCase struct {
+	name                    string
+	autoDistributionPercent int
+	pre                     func(s *SegmentRepoSuite, tc *deleteSegmentTestCase)
+	id                      uuid.UUID
+	expErr                  repository.Error
+}
+
 func (s *SegmentRepoSuite) TestRepo_DeleteSegment() {
-	testCases := []struct {
-		name   string
-		pre    func(s *SegmentRepoSuite)
-		id     uuid.UUID
-		expErr repository.Error
-	}{
+	testCases := []deleteSegmentTestCase{
 		{
 			name: "success",
-			pre: func(s *SegmentRepoSuite) {
-				segment := entity.NewSegment("aboba")
+			pre: func(s *SegmentRepoSuite, tc *deleteSegmentTestCase) {
+				segment := entity.NewSegment(tc.name, tc.autoDistributionPercent)
 				segment.ID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
 				_, err := s.r.NewSegment(context.Background(), segment)
@@ -34,8 +37,10 @@ func (s *SegmentRepoSuite) TestRepo_DeleteSegment() {
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
+			defer s.clean()
+
 			if tc.pre != nil {
-				tc.pre(s)
+				tc.pre(s, &tc)
 			}
 
 			err := s.r.DeleteSegment(context.Background(), tc.id)
@@ -43,8 +48,6 @@ func (s *SegmentRepoSuite) TestRepo_DeleteSegment() {
 				s.Require().Equal(tc.expErr, err)
 				return
 			}
-
-			s.clean()
 		})
 	}
 }

@@ -6,65 +6,69 @@ import (
 )
 
 type getUserSegmentsTestCase struct {
-	name       string
-	preSlugs   []string
-	leaveSlugs []string
-	pre        func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase)
-	userID     uint64
-	expErr     error
-}
-
-func contains(slugs []string, slug string) bool {
-	for _, s := range slugs {
-		if s == slug {
-			return true
-		}
-	}
-
-	return false
+	name            string
+	preUserSegments []*entity.UserSegment
+	leaveSlugs      []*entity.UserSegment
+	pre             func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase)
+	userID          uint64
+	expErr          error
 }
 
 func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 	testCases := []getUserSegmentsTestCase{
 		{
-			name:     "success",
-			userID:   1,
-			preSlugs: []string{"aboba", "bebra"},
+			name:   "success",
+			userID: 1,
+			preUserSegments: []*entity.UserSegment{
+				{Slug: "aboba"},
+				{Slug: "bebra"},
+			},
 			pre: func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase) {
-				for _, slug := range tc.preSlugs {
-					_, err := s.r.NewSegment(context.Background(), entity.NewSegment(slug))
+				for _, segment := range tc.preUserSegments {
+					sg := entity.NewSegment(segment.Slug, 0)
+					_, err := s.r.NewSegment(context.Background(), sg)
 					s.Require().NoError(err)
 				}
 
-				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preSlugs)
+				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preUserSegments)
 				s.Require().NoError(err)
 			},
 		},
 		{
-			name:     "success zero segments",
-			preSlugs: make([]string, 0),
+			name:            "success zero segments",
+			preUserSegments: make([]*entity.UserSegment, 0),
 		},
 		{
-			name: "have left segments",
+			name:   "have left segments",
+			userID: 1,
 			pre: func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase) {
-				for _, slug := range tc.preSlugs {
-					_, err := s.r.NewSegment(context.Background(), entity.NewSegment(slug))
+				for _, slug := range tc.preUserSegments {
+					sg := entity.NewSegment(slug.Slug, 0)
+					_, err := s.r.NewSegment(context.Background(), sg)
 					s.Require().NoError(err)
 				}
 
-				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preSlugs)
+				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preUserSegments)
 				s.Require().NoError(err)
 
 				err = s.r.LeaveUserFromSegments(context.Background(), tc.userID, tc.leaveSlugs)
 				s.Require().NoError(err)
 			},
-			preSlugs:   []string{"aboba", "bebra", "kekis"},
-			leaveSlugs: []string{"aboba"},
+			preUserSegments: []*entity.UserSegment{
+				{Slug: "aboba"},
+				{Slug: "bebra"},
+				{Slug: "kekis"},
+			},
+			leaveSlugs: []*entity.UserSegment{
+				{Slug: "aboba"},
+			},
 		},
 	}
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
+			defer s.clean()
+
 			if tc.pre != nil {
 				tc.pre(s, &tc)
 			}
@@ -75,20 +79,18 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 				return
 			}
 
-			activeSlugs := make([]string, 0, len(tc.preSlugs))
-			for _, slug := range tc.preSlugs {
-				if !contains(tc.leaveSlugs, slug) {
-					activeSlugs = append(activeSlugs, slug)
+			activeSegments := make([]*entity.UserSegment, 0)
+			for _, segment := range tc.preUserSegments {
+				if !containsUserSegments(tc.leaveSlugs, segment) {
+					activeSegments = append(activeSegments, segment)
 				}
 			}
 
 			s.Require().NoError(err)
-			s.Require().Equal(len(activeSlugs), len(segments))
-			for _, segment := range segments {
-				s.Require().Contains(activeSlugs, segment.Slug)
+			s.Require().Equal(len(activeSegments), len(segments))
+			for i := range activeSegments {
+				s.Require().Equal(activeSegments[i].Slug, segments[i].Slug)
 			}
-
-			s.clean()
 		})
 	}
 }

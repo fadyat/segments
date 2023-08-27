@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 type SegmentRepoSuite struct {
@@ -55,4 +56,22 @@ func (s *SegmentRepoSuite) TearDownSuite() {
 
 func TestSegmentRepository(t *testing.T) {
 	suite.Run(t, new(SegmentRepoSuite))
+}
+
+func equalDates(a, b *time.Time) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil && b != nil || a != nil && b == nil {
+		return false
+	}
+
+	ay, am, ad := a.Date()
+	by, bm, bd := b.Date()
+
+	ah, amin, _ := a.Clock()
+	bh, bmin, _ := b.Clock()
+
+	return ay == by && am == bm && ad == bd && ah == bh && amin == bmin
 }

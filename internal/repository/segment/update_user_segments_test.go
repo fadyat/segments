@@ -15,9 +15,16 @@ type updateUserSegmentsTestCase struct {
 	expErr       error
 }
 
+// containsUserSegments may work incorrectly when not all dates are provided.
+//
+// in context of current tests everything is ok.
 func containsUserSegments(segments []*entity.UserSegment, segment *entity.UserSegment) bool {
 	for _, s := range segments {
-		if s.Slug == segment.Slug && equalDates(s.DueAt, segment.DueAt) {
+		equalSlugs := s.Slug == segment.Slug
+		equalDueAt := equalTimes(s.DueAt, segment.DueAt)
+		equalLeftAt := equalTimes(s.LeftAt, segment.LeftAt)
+
+		if equalSlugs && equalDueAt && equalLeftAt {
 			return true
 		}
 	}
@@ -40,10 +47,6 @@ func validateUserSegments(
 }
 
 func (s *SegmentRepoSuite) TestRepo_JoinUserToSegments() {
-	toTimePtr := func(t time.Time) *time.Time {
-		return &t
-	}
-
 	testCases := []updateUserSegmentsTestCase{
 		{
 			name:   "segments not found",

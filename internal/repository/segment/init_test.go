@@ -2,6 +2,11 @@ package segment
 
 import (
 	"avito-internship-2023/internal/repository"
+	"database/sql"
+	"errors"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
@@ -28,12 +33,36 @@ func newTestDatabase() *sqlx.DB {
 	return db
 }
 
+func applyMigrations(db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+
+	migrationsPath := os.Getenv("TEST_DATABASE_MIGRATIONS_PATH")
+	m, err := migrate.NewWithDatabaseInstance(migrationsPath, "postgres", driver)
+	if err != nil {
+		return err
+	}
+
+	err = m.Up()
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return err
+	}
+
+	return nil
+}
+
 func (s *SegmentRepoSuite) SetupSuite() {
 	logger, _ := zap.NewDevelopment()
 	zap.ReplaceGlobals(logger)
 
 	s.db = newTestDatabase()
 	s.r = NewRepository(repository.NewTransactor(s.db))
+	err := applyMigrations(s.db.DB)
+	if err != nil {
+		log.Fatal("failed to apply migrations: ", err)
+	}
 }
 
 func (s *SegmentRepoSuite) clean() {
@@ -58,7 +87,7 @@ func TestSegmentRepository(t *testing.T) {
 	suite.Run(t, new(SegmentRepoSuite))
 }
 
-func equalDates(a, b *time.Time) bool {
+func equalTimes(a, b *time.Time) bool {
 	if a == nil && b == nil {
 		return true
 	}
@@ -74,4 +103,8 @@ func equalDates(a, b *time.Time) bool {
 	bh, bmin, _ := b.Clock()
 
 	return ay == by && am == bm && ad == bd && ah == bh && amin == bmin
+}
+
+func toTimePtr(t time.Time) *time.Time {
+	return &t
 }

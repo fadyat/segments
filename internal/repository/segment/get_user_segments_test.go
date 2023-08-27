@@ -8,7 +8,7 @@ import (
 type getUserSegmentsTestCase struct {
 	name            string
 	preUserSegments []*entity.UserSegment
-	leaveSlugs      []*entity.UserSegment
+	leaveSegments   []*entity.UserSegment
 	pre             func(s *SegmentRepoSuite, tc *getUserSegmentsTestCase)
 	userID          uint64
 	expErr          error
@@ -51,7 +51,7 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 				err := s.r.JoinUserToSegments(context.Background(), tc.userID, tc.preUserSegments)
 				s.Require().NoError(err)
 
-				err = s.r.LeaveUserFromSegments(context.Background(), tc.userID, tc.leaveSlugs)
+				err = s.r.LeaveUserFromSegments(context.Background(), tc.userID, tc.leaveSegments)
 				s.Require().NoError(err)
 			},
 			preUserSegments: []*entity.UserSegment{
@@ -59,7 +59,7 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 				{Slug: "bebra"},
 				{Slug: "kekis"},
 			},
-			leaveSlugs: []*entity.UserSegment{
+			leaveSegments: []*entity.UserSegment{
 				{Slug: "aboba"},
 			},
 		},
@@ -81,7 +81,7 @@ func (s *SegmentRepoSuite) TestRepo_GetUserSegments() {
 
 			activeSegments := make([]*entity.UserSegment, 0)
 			for _, segment := range tc.preUserSegments {
-				if !containsUserSegments(tc.leaveSlugs, segment) {
+				if !containsUserSegments(tc.leaveSegments, segment) {
 					activeSegments = append(activeSegments, segment)
 				}
 			}

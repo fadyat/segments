@@ -33,17 +33,17 @@ func (r *repo) joinUserToSegments(
 
 	var (
 		queryBuilder strings.Builder
-		args         = make([]any, 0, 3*len(knownSegments))
+		args         = make([]any, 0, 4*len(knownSegments))
 	)
 
-	queryBuilder.WriteString("insert into user_segment (user_id, segment_id, due_at) values ")
+	queryBuilder.WriteString("insert into user_segment (user_id, segment_id, due_at, joined_at) values ")
 	for i, segment := range knownSegments {
 		if i != 0 {
 			queryBuilder.WriteString(", ")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf("($%d, $%d, $%d)", 3*i+1, 3*i+2, 3*i+3))
-		args = append(args, userID, segment.ID, segments[i].DueAt)
+		queryBuilder.WriteString(fmt.Sprintf("($%d, $%d, $%d, $%d)", 4*i+1, 4*i+2, 4*i+3, 4*i+4))
+		args = append(args, userID, segment.ID, segments[i].DueAt, segments[i].JoinedAt)
 	}
 
 	queryBuilder.WriteString(" on conflict (user_id, segment_id) where left_at is null do nothing")

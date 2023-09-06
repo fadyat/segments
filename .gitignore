@@ -10,3 +10,4 @@ venv
 /*.xls
 /*.xlsx
 /*.json
+.DS_Store
